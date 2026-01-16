@@ -1,0 +1,2005 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlutoniumClient</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Montserrat', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        :root {
+            --primary-bg: #0f172a;
+            --secondary-bg: #1e293b;
+            --card-bg: #334155;
+            --text-primary: #ffffff;
+            --text-secondary: #e2e8f0;
+            --border-color: #475569;
+            --error-color: #ef4444;
+            --success-color: #22c55e;
+            --warning-color: #f59e0b;
+        }
+        
+        body {
+            background-color: var(--primary-bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+            font-weight: 700;
+            min-height: 100vh;
+        }
+        
+        /* Падающие цифры */
+        .falling-numbers {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 5;
+            overflow: hidden;
+        }
+        
+        .falling-number {
+            position: absolute;
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 18px;
+            font-weight: 900;
+            opacity: 0;
+            animation: fallDown linear infinite;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            user-select: none;
+        }
+        
+        @keyframes fallDown {
+            0% {
+                transform: translateY(-100px) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.8;
+            }
+            90% {
+                opacity: 0.8;
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        
+        /* Все тексты белые */
+        h1, h2, h3, h4, h5, h6,
+        .logo, .nav-menu a, .btn-buy, .btn-submit,
+        .product-title, .product-price, .section-title,
+        .modal h2, .profile-header h2, .profile-info h3,
+        .info-label, .info-value, .subscription-status,
+        .form-footer a, .footer-logo, .footer-links h3,
+        .footer-social h3, .btn-auth, .promo-badge,
+        .payment-title, .payment-subtitle, .btn-payment,
+        .back-btn, .payment-method-title, .qr-title,
+        .payment-amount, .payment-status, .timer-text,
+        .instruction-title, .instruction-step {
+            font-weight: 800 !important;
+            color: var(--text-primary) !important;
+        }
+        
+        p, .product-description, .product-period,
+        .form-group label, .product-features li,
+        .section-subtitle, .copyright, .form-footer,
+        .stat-text, .payment-description, .payment-terms,
+        .payment-method-desc, .qr-instructions, .timer-label,
+        .instruction-desc {
+            font-weight: 700 !important;
+            color: var(--text-secondary) !important;
+        }
+        
+        /* Убраны градиентные тексты */
+        .logo, .product-price, .footer-logo, .hero h1 {
+            background: none !important;
+            -webkit-background-clip: unset !important;
+            -webkit-text-fill-color: unset !important;
+            color: var(--text-primary) !important;
+        }
+        
+        /* Анимации */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        @keyframes slideInLeft {
+            from { transform: translateX(-100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(255, 255, 255, 0.3); }
+            50% { box-shadow: 0 0 40px rgba(255, 255, 255, 0.6); }
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        /* Снежинки */
+        .snowflakes {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+        }
+        
+        .snowflake {
+            position: absolute;
+            color: var(--text-primary);
+            font-size: 20px;
+            opacity: 0.7;
+            animation: fall linear infinite, float 3s ease-in-out infinite;
+        }
+        
+        @keyframes fall {
+            0% {
+                transform: translateY(-100px) translateX(0) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.8;
+            }
+            90% {
+                opacity: 0.8;
+            }
+            100% {
+                transform: translateY(100vh) translateX(20px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        
+        /* Контейнер */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            position: relative;
+            z-index: 10;
+        }
+        
+        /* Шапка */
+        header {
+            padding: 25px 0;
+            position: relative;
+            z-index: 100;
+            background-color: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            animation: fadeIn 0.8s ease-out;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 32px;
+            animation: pulse 3s infinite;
+        }
+        
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            align-items: center;
+        }
+        
+        .nav-menu li {
+            margin-left: 30px;
+        }
+        
+        .nav-menu a {
+            color: var(--text-primary);
+            text-decoration: none;
+            font-size: 18px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-menu a:hover {
+            color: var(--text-primary);
+            transform: translateY(-2px);
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+        
+        .nav-menu a.active {
+            color: var(--text-primary);
+        }
+        
+        .nav-menu a.active::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 3px;
+            bottom: -8px;
+            left: 0;
+            background-color: var(--text-primary);
+            animation: glow 2s infinite;
+        }
+        
+        .auth-buttons {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .btn-auth {
+            padding: 12px 30px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-auth::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        
+        .btn-auth:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+        
+        .btn-login {
+            background-color: transparent;
+            color: var(--text-primary);
+            border: 2px solid var(--text-primary);
+        }
+        
+        .btn-login:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 255, 255, 0.3);
+        }
+        
+        .btn-register {
+            background-color: rgba(255, 255, 255, 0.9);
+            color: var(--primary-bg);
+            border: none;
+        }
+        
+        .btn-register:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 255, 255, 0.4);
+        }
+        
+        /* Герой секция */
+        .hero {
+            padding: 120px 0 100px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            animation: fadeIn 1s ease-out;
+        }
+        
+        .hero h1 {
+            font-size: 56px;
+            margin-bottom: 25px;
+            line-height: 1.2;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        .hero-image {
+            animation: fadeIn 1.2s ease-out;
+            transition: transform 0.5s ease;
+            margin-top: 40px;
+        }
+        
+        .hero-image:hover {
+            transform: scale(1.02);
+        }
+        
+        .hero-image img {
+            max-width: 100%;
+            border-radius: 15px;
+            border: 3px solid var(--text-primary);
+            box-shadow: 0 15px 35px rgba(255, 255, 255, 0.3);
+            animation: glow 3s infinite, float 4s ease-in-out infinite;
+        }
+        
+        .promo-code {
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 2px solid var(--text-primary);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 40px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            animation: pulse 2s infinite;
+        }
+        
+        .promo-code h3 {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: var(--text-primary) !important;
+        }
+        
+        .promo-code p {
+            font-size: 18px;
+        }
+        
+        /* Модальные окна */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+            backdrop-filter: blur(5px);
+        }
+        
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal {
+            background-color: var(--card-bg);
+            border-radius: 20px;
+            padding: 50px;
+            width: 100%;
+            max-width: 500px;
+            border: 1px solid var(--border-color);
+            transform: translateY(-30px) scale(0.9);
+            transition: transform 0.4s, opacity 0.4s;
+            position: relative;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+            opacity: 0;
+        }
+        
+        .modal-overlay.active .modal {
+            transform: translateY(0) scale(1);
+            opacity: 1;
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 28px;
+            cursor: pointer;
+            transition: color 0.3s, transform 0.3s;
+            font-weight: 800;
+        }
+        
+        .close-modal:hover {
+            color: var(--text-primary);
+            transform: rotate(90deg);
+        }
+        
+        .modal h2 {
+            font-size: 36px;
+            margin-bottom: 35px;
+            color: var(--text-primary);
+            text-align: center;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+            animation: fadeIn 0.6s ease-out;
+            animation-fill-mode: both;
+        }
+        
+        .form-group:nth-child(1) { animation-delay: 0.1s; }
+        .form-group:nth-child(2) { animation-delay: 0.2s; }
+        .form-group:nth-child(3) { animation-delay: 0.3s; }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 10px;
+            color: var(--text-secondary);
+            font-size: 16px;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 16px 20px;
+            background-color: var(--secondary-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 18px;
+            transition: all 0.3s ease;
+            font-weight: 700;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--text-primary);
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .btn-submit {
+            width: 100%;
+            padding: 18px;
+            background-color: rgba(255, 255, 255, 0.9);
+            color: var(--primary-bg);
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+            position: relative;
+            overflow: hidden;
+            font-weight: 800;
+        }
+        
+        .btn-submit:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(255, 255, 255, 0.4);
+        }
+        
+        .btn-submit:active {
+            transform: translateY(-1px);
+        }
+        
+        .form-footer {
+            text-align: center;
+            margin-top: 25px;
+            color: var(--text-secondary);
+            font-size: 16px;
+            animation: fadeIn 0.8s ease-out;
+        }
+        
+        .form-footer a {
+            color: var(--text-primary);
+            text-decoration: none;
+            position: relative;
+        }
+        
+        .form-footer a::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--text-primary);
+            transition: width 0.3s;
+        }
+        
+        .form-footer a:hover::after {
+            width: 100%;
+        }
+        
+        .error-message {
+            color: var(--error-color);
+            font-size: 15px;
+            margin-top: 8px;
+            display: none;
+            font-weight: 700;
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        .success-message {
+            color: var(--success-color);
+            font-size: 15px;
+            margin-top: 8px;
+            display: none;
+            font-weight: 700;
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        /* Секции */
+        section {
+            padding: 80px 0;
+            animation: fadeIn 0.8s ease-out;
+        }
+        
+        .section-title {
+            text-align: center;
+            font-size: 42px;
+            margin-bottom: 25px;
+            color: var(--text-primary);
+        }
+        
+        .section-subtitle {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 20px;
+            max-width: 700px;
+            margin: 0 auto 60px;
+        }
+        
+        /* Товары */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 35px;
+            margin-top: 50px;
+        }
+        
+        .product-card {
+            background-color: var(--card-bg);
+            border-radius: 20px;
+            padding: 35px;
+            border: 2px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+            animation: fadeIn 0.6s ease-out;
+            animation-fill-mode: both;
+        }
+        
+        .product-card:nth-child(1) { animation-delay: 0.1s; }
+        .product-card:nth-child(2) { animation-delay: 0.2s; }
+        .product-card:nth-child(3) { animation-delay: 0.3s; }
+        .product-card:nth-child(4) { animation-delay: 0.4s; }
+        .product-card:nth-child(5) { animation-delay: 0.5s; }
+        
+        .product-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.7s;
+        }
+        
+        .product-card:hover::before {
+            left: 100%;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-12px);
+            border-color: var(--text-primary);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+        }
+        
+        .product-card.popular {
+            border: 3px solid var(--text-primary);
+            animation: glow 2s infinite;
+        }
+        
+        .popular-badge {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(255, 255, 255, 0.9);
+            color: var(--primary-bg);
+            padding: 8px 25px;
+            border-radius: 25px;
+            font-size: 16px;
+            animation: pulse 2s infinite;
+            font-weight: 800;
+        }
+        
+        .product-title {
+            font-size: 28px;
+            margin-bottom: 15px;
+        }
+        
+        .product-price {
+            font-size: 42px;
+            margin-bottom: 20px;
+            color: var(--text-primary) !important;
+        }
+        
+        .product-period {
+            color: var(--text-secondary);
+            font-size: 18px;
+            margin-bottom: 25px;
+        }
+        
+        .product-description {
+            color: var(--text-secondary);
+            margin-bottom: 30px;
+            flex-grow: 1;
+            font-size: 16px;
+            line-height: 1.7;
+        }
+        
+        .product-features {
+            list-style: none;
+            margin-bottom: 35px;
+        }
+        
+        .product-features li {
+            padding: 10px 0;
+            color: var(--text-secondary);
+            position: relative;
+            padding-left: 30px;
+            font-size: 16px;
+            transition: transform 0.3s, color 0.3s;
+        }
+        
+        .product-features li:hover {
+            color: var(--text-primary);
+            transform: translateX(5px);
+        }
+        
+        .product-features li:before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--text-primary);
+            font-weight: bold;
+            font-size: 18px;
+            transition: transform 0.3s;
+        }
+        
+        .product-features li:hover:before {
+            transform: scale(1.2);
+        }
+        
+        /* Темная кнопка приобрести */
+        .btn-buy {
+            display: block;
+            text-align: center;
+            background-color: var(--primary-bg);
+            color: var(--text-primary);
+            padding: 18px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-size: 18px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            font-weight: 800;
+            border: 2px solid var(--text-primary);
+        }
+        
+        .btn-buy:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 25px rgba(255, 255, 255, 0.4);
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .btn-buy:active {
+            transform: translateY(-1px);
+        }
+        
+        .hwid-reset-card {
+            max-width: 450px;
+            margin: 0 auto 60px;
+            animation: fadeIn 0.8s ease-out;
+        }
+        
+        /* Профиль */
+        .profile-section {
+            display: none;
+            padding: 40px 0;
+            animation: slideInRight 0.6s ease-out;
+        }
+        
+        .profile-section.active {
+            display: block;
+        }
+        
+        .profile-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            padding-bottom: 25px;
+            border-bottom: 2px solid var(--border-color);
+        }
+        
+        .profile-header h2 {
+            font-size: 36px;
+            color: var(--text-primary);
+        }
+        
+        .subscription-status {
+            display: inline-block;
+            padding: 8px 18px;
+            background-color: rgba(239, 68, 68, 0.2);
+            color: var(--error-color);
+            border-radius: 25px;
+            font-size: 16px;
+        }
+        
+        .subscription-status.active {
+            background-color: rgba(34, 197, 94, 0.2);
+            color: var(--success-color);
+            animation: pulse 2s infinite;
+        }
+        
+        .profile-content {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 45px;
+        }
+        
+        .profile-sidebar {
+            background-color: var(--card-bg);
+            border-radius: 20px;
+            padding: 30px;
+            border: 2px solid var(--border-color);
+            animation: slideInLeft 0.6s ease-out;
+        }
+        
+        .profile-menu {
+            list-style: none;
+        }
+        
+        .profile-menu li {
+            margin-bottom: 15px;
+        }
+        
+        .profile-menu a {
+            display: block;
+            padding: 15px 20px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            font-size: 17px;
+        }
+        
+        .profile-menu a:hover,
+        .profile-menu a.active {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+            transform: translateX(5px);
+        }
+        
+        .profile-main {
+            background-color: var(--card-bg);
+            border-radius: 20px;
+            padding: 35px;
+            border: 2px solid var(--border-color);
+            animation: slideInRight 0.6s ease-out;
+        }
+        
+        .profile-info h3 {
+            font-size: 28px;
+            margin-bottom: 30px;
+            color: var(--text-primary);
+        }
+        
+        .info-item {
+            display: flex;
+            margin-bottom: 25px;
+            padding-bottom: 25px;
+            border-bottom: 1px solid var(--border-color);
+            transition: transform 0.3s;
+        }
+        
+        .info-item:hover {
+            transform: translateX(5px);
+        }
+        
+        .info-label {
+            width: 220px;
+            color: var(--text-secondary);
+            font-size: 17px;
+        }
+        
+        .info-value {
+            flex: 1;
+            color: var(--text-primary);
+            font-size: 17px;
+        }
+        
+        .btn-logout {
+            padding: 15px 30px;
+            background-color: transparent;
+            color: var(--error-color);
+            border: 2px solid var(--error-color);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 35px;
+            font-size: 17px;
+        }
+        
+        .btn-logout:hover {
+            background-color: rgba(239, 68, 68, 0.1);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(239, 68, 68, 0.2);
+        }
+        
+        /* Футер */
+        footer {
+            background-color: var(--secondary-bg);
+            padding: 70px 0 35px;
+            margin-top: 50px;
+            animation: fadeIn 1s ease-out;
+        }
+        
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 45px;
+            margin-bottom: 40px;
+        }
+        
+        .footer-logo {
+            font-size: 28px;
+            margin-bottom: 25px;
+            animation: pulse 3s infinite;
+        }
+        
+        .footer-links h3, .footer-social h3 {
+            font-size: 22px;
+            margin-bottom: 25px;
+            color: var(--text-primary);
+        }
+        
+        .footer-links ul {
+            list-style: none;
+        }
+        
+        .footer-links li {
+            margin-bottom: 15px;
+            transition: transform 0.3s;
+        }
+        
+        .footer-links li:hover {
+            transform: translateX(5px);
+        }
+        
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.3s;
+            font-size: 16px;
+        }
+        
+        .footer-links a:hover {
+            color: var(--text-primary);
+        }
+        
+        .social-icons {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .social-icons a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+            background-color: var(--card-bg);
+            border-radius: 50%;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 22px;
+        }
+        
+        .social-icons a:hover {
+            background-color: rgba(255, 255, 255, 0.9);
+            color: var(--primary-bg);
+            transform: translateY(-3px) rotate(5deg);
+        }
+        
+        /* Телеграм модальное окно */
+        .telegram-modal .modal {
+            max-width: 500px;
+        }
+        
+        .telegram-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .telegram-title {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .telegram-subtitle {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+        }
+        
+        .telegram-description {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .telegram-container {
+            background-color: var(--secondary-bg);
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 25px;
+            border: 2px solid var(--border-color);
+        }
+        
+        .telegram-icon {
+            width: 100px;
+            height: 100px;
+            background-color: var(--card-bg);
+            border-radius: 50%;
+            margin: 0 auto 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 50px;
+            color: var(--text-primary);
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        .telegram-amount {
+            font-size: 32px;
+            margin-bottom: 10px;
+            color: var(--text-primary) !important;
+        }
+        
+        .telegram-status {
+            font-size: 18px;
+            margin-bottom: 25px;
+            color: var(--warning-color) !important;
+        }
+        
+        .telegram-link {
+            display: inline-block;
+            background-color: var(--primary-bg);
+            color: var(--text-primary);
+            padding: 15px 30px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-size: 18px;
+            font-weight: 800;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+            border: 2px solid var(--text-primary);
+        }
+        
+        .telegram-link:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(255, 255, 255, 0.4);
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Адаптивность */
+        @media (max-width: 992px) {
+            .section-title {
+                font-size: 36px;
+            }
+            
+            .profile-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .modal h2 {
+                font-size: 32px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .nav-menu {
+                margin-top: 25px;
+                flex-wrap: wrap;
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .nav-menu li {
+                margin: 0 0 12px 0;
+            }
+            
+            .auth-buttons {
+                width: 100%;
+                justify-content: center;
+                margin-top: 15px;
+            }
+            
+            .hero {
+                padding: 100px 0 80px;
+            }
+            
+            .hero h1 {
+                font-size: 42px;
+            }
+            
+            section {
+                padding: 60px 0;
+            }
+            
+            .modal {
+                padding: 35px 25px;
+                margin: 0 20px;
+            }
+            
+            .product-card {
+                padding: 25px;
+            }
+            
+            .product-title {
+                font-size: 24px;
+            }
+            
+            .product-price {
+                font-size: 36px;
+            }
+            
+            .promo-code {
+                padding: 15px;
+            }
+            
+            .promo-code h3 {
+                font-size: 20px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .logo {
+                font-size: 28px;
+            }
+            
+            .hero h1 {
+                font-size: 32px;
+            }
+            
+            .product-card {
+                padding: 20px;
+            }
+            
+            .info-item {
+                flex-direction: column;
+            }
+            
+            .info-label {
+                width: 100%;
+                margin-bottom: 8px;
+            }
+            
+            .btn-auth {
+                padding: 10px 20px;
+                font-size: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Падающие цифры -->
+    <div class="falling-numbers" id="falling-numbers"></div>
+    
+    <!-- Снежинки -->
+    <div class="snowflakes" id="snowflakes"></div>
+    
+    <!-- Шапка -->
+    <header style="display: none;" id="site-header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">PlutoniumClient</div>
+                <ul class="nav-menu">
+                    <li><a href="#home" class="active" id="nav-home">Главная</a></li>
+                    <li><a href="#products" id="nav-products">Товары</a></li>
+                    <li><a href="#profile" id="nav-profile" style="display: none;">Мой профиль</a></li>
+                    <li class="auth-buttons" id="auth-buttons" style="display: none;">
+                        <a href="#" class="btn-auth btn-login" id="btn-login">Войти</a>
+                        <a href="#" class="btn-auth btn-register" id="btn-register">Регистрация</a>
+                    </li>
+                    <li id="user-info" style="display: none;">
+                        <span id="user-email" style="color: var(--text-primary); font-weight: 800;"></span>
+                        <a href="#" class="btn-logout" id="btn-logout" style="margin-left: 15px; padding: 10px 20px; font-size: 15px; background: transparent; color: var(--error-color); border: 2px solid var(--error-color); border-radius: 8px; text-decoration: none;">Выйти</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Главная страница -->
+    <section id="home" class="hero" style="display: none;">
+        <div class="container">
+            <h1>PlutoniumClient</h1>
+            <div class="hero-image">
+                <img src="https://raw.githubusercontent.com/your-username/repository-name/main/maxresdefault.jpg" alt="Plutonium Interface">
+            </div>
+            <div class="promo-code">
+                <h3>🎁 Промокод для новых пользователей</h3>
+                <p>Используйте промокод <strong style="color: var(--text-primary); font-size: 20px;">PLUTONIUM25</strong> при регистрации для получения специальных бонусов!</p>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Товары -->
+    <section id="products" style="display: none;">
+        <div class="container">
+            <h2 class="section-title">Товары</h2>
+            <p class="section-subtitle">Выберите подходящий для вас вариант подписки</p>
+            
+            <!-- Сброс HWID -->
+            <div class="hwid-reset-card">
+                <div class="product-card">
+                    <h3 class="product-title">Сброс HWID</h3>
+                    <div class="product-price">150₽</div>
+                    <div class="product-period">Однократная услуга</div>
+                    <p class="product-description">Сброс привязки (HWID) на вашем аккаунте клиента к железу.</p>
+                    <a href="#" class="btn-buy" data-product="hwid" data-price="150" id="buy-hwid">Приобрести</a>
+                </div>
+            </div>
+            
+            <div class="products-grid">
+                <div class="product-card">
+                    <h3 class="product-title">Plutonium БЕТА</h3>
+                    <div class="product-price">2000₽</div>
+                    <div class="product-period">Навсегда</div>
+                    <p class="product-description">Вы получаете ранний доступ к новым модулям, обновлениям клиента и эксклюзивные функции.</p>
+                    <ul class="product-features">
+                        <li>Неограниченный доступ</li>
+                        <li>Обновления без ограничений</li>
+                        <li>Эксклюзивные функции</li>
+                    </ul>
+                    <a href="#" class="btn-buy" data-product="beta" data-price="2000" id="buy-beta">Приобрести</a>
+                </div>
+                
+                <div class="product-card popular">
+                    <div class="popular-badge">ПОПУЛЯРНОЕ</div>
+                    <h3 class="product-title">Plutonium навсегда</h3>
+                    <div class="product-price">1500₽</div>
+                    <div class="product-period">Навсегда</div>
+                    <p class="product-description">Вы получаете клиент абсолютно навсегда, так же все последующие обновления.</p>
+                    <ul class="product-features">
+                        <li>Неограниченный доступ</li>
+                        <li>Обновления без ограничений</li>
+                        <li>Эксклюзивные функции</li>
+                    </ul>
+                    <a href="#" class="btn-buy" data-product="forever" data-price="1500" id="buy-forever">Приобрести</a>
+                </div>
+                
+                <div class="product-card">
+                    <h3 class="product-title">Plutonium 90 дней</h3>
+                    <div class="product-price">990₽</div>
+                    <div class="product-period">Доступ на 90 дней</div>
+                    <p class="product-description">Вы получаете клиент всего на 90 дней, обновления на этот период</p>
+                    <ul class="product-features">
+                        <li>Неограниченный доступ</li>
+                        <li>Обновления без ограничений</li>
+                        <li>Эксклюзивные функции</li>
+                    </ul>
+                    <a href="#" class="btn-buy" data-product="90days" data-price="990" id="buy-90days">Приобрести</a>
+                </div>
+                
+                <div class="product-card">
+                    <h3 class="product-title">Plutonium месяц</h3>
+                    <div class="product-price">500₽</div>
+                    <div class="product-period">Доступ на 30 дней</div>
+                    <p class="product-description">Вы получаете клиент всего на 30 дней, обновления на этот период.</p>
+                    <ul class="product-features">
+                        <li>Неограниченный доступ</li>
+                        <li>Обновления без ограничений</li>
+                        <li>Эксклюзивные функции</li>
+                    </ul>
+                    <a href="#" class="btn-buy" data-product="month" data-price="500" id="buy-month">Приобрести</a>
+                </div>
+                
+                <div class="product-card">
+                    <h3 class="product-title">Plutonium неделя</h3>
+                    <div class="product-price">350₽</div>
+                    <div class="product-period">Доступ на 7 дней</div>
+                    <p class="product-description">Вы получаете клиент всего на 7 дней, обновления на этот период.</p>
+                    <ul class="product-features">
+                        <li>Неограниченный доступ</li>
+                        <li>Обновления без ограничений</li>
+                        <li>Эксклюзивные функции</li>
+                    </ul>
+                    <a href="#" class="btn-buy" data-product="week" data-price="350" id="buy-week">Приобрести</a>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Профиль -->
+    <section id="profile" class="profile-section">
+        <div class="container">
+            <div class="profile-header">
+                <h2>Мой профиль</h2>
+                <div class="subscription-status inactive" id="profile-subscription-status">Подписка не активна</div>
+            </div>
+            
+            <div class="profile-content">
+                <div class="profile-sidebar">
+                    <ul class="profile-menu">
+                        <li><a href="#" class="active" id="profile-info-btn">Информация</a></li>
+                        <li><a href="#" id="profile-subscription-btn">Подписка</a></li>
+                        <li><a href="#" id="profile-settings-btn">Настройки</a></li>
+                        <li><a href="#" id="profile-history-btn">История покупок</a></li>
+                    </ul>
+                </div>
+                
+                <div class="profile-main">
+                    <div class="profile-info" id="profile-info">
+                        <h3>Информация об аккаунте</h3>
+                        <div class="info-item">
+                            <div class="info-label">Email:</div>
+                            <div class="info-value" id="profile-email">user@example.com</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Дата регистрации:</div>
+                            <div class="info-value" id="profile-reg-date">01.01.2025</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">UID:</div>
+                            <div class="info-value" id="profile-uid">000000</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Роль:</div>
+                            <div class="info-value" id="profile-role">Пользователь</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">HWID:</div>
+                            <div class="info-value" id="profile-hwid">Не привязан</div>
+                        </div>
+                        <button class="btn-logout" id="profile-logout">Выйти из аккаунта</button>
+                    </div>
+                    
+                    <div class="profile-subscription" id="profile-subscription" style="display: none;">
+                        <h3>Информация о подписке</h3>
+                        <div class="info-item">
+                            <div class="info-label">Текущий тариф:</div>
+                            <div class="info-value" id="subscription-plan">Без подписки</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Статус:</div>
+                            <div class="info-value"><span class="subscription-status inactive" id="subscription-status-text">Не активна</span></div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Дата окончания:</div>
+                            <div class="info-value" id="subscription-end">Не установлена</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Следующий платеж:</div>
+                            <div class="info-value" id="subscription-next">Не требуется</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Модальное окно входа -->
+    <div class="modal-overlay" id="login-modal">
+        <div class="modal">
+            <button class="close-modal" id="close-login">&times;</button>
+            <h2>Вход в аккаунт</h2>
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="login-email">Email</label>
+                    <input type="email" id="login-email" class="form-control" placeholder="Введите ваш email" required>
+                    <div class="error-message" id="login-email-error"></div>
+                </div>
+                <div class="form-group">
+                    <label for="login-password">Пароль</label>
+                    <input type="password" id="login-password" class="form-control" placeholder="Введите ваш пароль" required>
+                    <div class="error-message" id="login-password-error"></div>
+                </div>
+                <button type="submit" class="btn-submit">Войти</button>
+            </form>
+            <div class="form-footer">
+                Нет аккаунта? <a href="#" id="switch-to-register">Зарегистрироваться</a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Модальное окно регистрации -->
+    <div class="modal-overlay" id="register-modal">
+        <div class="modal">
+            <button class="close-modal" id="close-register">&times;</button>
+            <h2>Регистрация</h2>
+            <form id="register-form">
+                <div class="form-group">
+                    <label for="register-email">Email</label>
+                    <input type="email" id="register-email" class="form-control" placeholder="Введите ваш email" required>
+                    <div class="error-message" id="register-email-error"></div>
+                    <div class="success-message" id="register-email-success"></div>
+                </div>
+                <div class="form-group">
+                    <label for="register-password">Пароль</label>
+                    <input type="password" id="register-password" class="form-control" placeholder="Введите пароль" required>
+                    <div class="error-message" id="register-password-error"></div>
+                </div>
+                <div class="form-group">
+                    <label for="register-password-confirm">Повторите пароль</label>
+                    <input type="password" id="register-password-confirm" class="form-control" placeholder="Повторите пароль" required>
+                    <div class="error-message" id="register-password-confirm-error"></div>
+                </div>
+                <div class="form-group">
+                    <label for="register-promo">Промокод (необязательно)</label>
+                    <input type="text" id="register-promo" class="form-control" placeholder="Введите промокод, если есть" value="PLUTONIUM25">
+                    <div class="success-message" id="register-promo-success"></div>
+                </div>
+                <button type="submit" class="btn-submit">Зарегистрироваться</button>
+            </form>
+            <div class="form-footer">
+                Уже есть аккаунт? <a href="#" id="switch-to-login">Войти</a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Модальное окно Telegram -->
+    <div class="modal-overlay telegram-modal" id="telegram-modal">
+        <div class="modal">
+            <button class="close-modal" id="close-telegram">&times;</button>
+            <div class="telegram-header">
+                <h2 class="telegram-title">Оплата через Telegram</h2>
+                <div class="telegram-subtitle" id="telegram-product-title">Plutonium навсегда</div>
+            </div>
+            
+            <p class="telegram-description">
+                Для завершения покупки перейдите в наш Telegram-канал и свяжитесь с администратором.
+            </p>
+            
+            <div class="telegram-container">
+                <div class="telegram-icon">
+                    <i class="fab fa-telegram"></i>
+                </div>
+                <div class="telegram-amount" id="telegram-amount">1500 ₽</div>
+                <div class="telegram-status" id="telegram-status">Ожидание оплаты</div>
+                
+                <a href="https://t.me/PlutoniumOfficiall" target="_blank" class="telegram-link">
+                    <i class="fab fa-telegram"></i> Перейти в Telegram
+                </a>
+            </div>
+            
+            <div class="telegram-description">
+                <p><strong>Инструкция:</strong></p>
+                <ol style="text-align: left; margin-left: 20px;">
+                    <li>Нажмите на кнопку "Перейти в Telegram" выше</li>
+                    <li>Напишите администратору о желании приобрести продукт</li>
+                    <li>Укажите название продукта и сумму оплаты</li>
+                    <li>Следуйте инструкциям администратора для оплаты</li>
+                    <li>После оплаты получите доступ к продукту</li>
+                </ol>
+            </div>
+            
+            <div style="text-align: center; margin-top: 30px;">
+                <a href="#" class="btn-auth btn-login" id="telegram-back" style="display: inline-block;">
+                    <i class="fas fa-arrow-left"></i>
+                    Вернуться назад
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Футер -->
+    <footer style="display: none;" id="site-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-about">
+                    <div class="footer-logo">PlutoniumClient</div>
+                    <p>Мощность в каждой детали — расширь возможности своей игры!</p>
+                </div>
+                
+                <div class="footer-links">
+                    <h3>Ссылки</h3>
+                    <ul>
+                        <li><a href="#home" class="footer-nav" data-target="home">Главная</a></li>
+                        <li><a href="#products" class="footer-nav" data-target="products">Товары</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-social">
+                    <h3>Мы в соцсетях</h3>
+                    <div class="social-icons">
+                        <a href="https://t.me/PlutoniumOfficiall" target="_blank"><i class="fab fa-telegram"></i></a>
+                        <a href="#"><i class="fab fa-discord"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                        <a href="#"><i class="fab fa-vk"></i></a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="copyright">
+                PlutoniumClient © 2025. Все права защищены.
+            </div>
+        </div>
+    </footer>
+    
+    <script>
+        // Глобальные переменные для состояния пользователя
+        let currentUser = null;
+        let selectedProduct = null;
+        let usersDatabase = JSON.parse(localStorage.getItem('plutoniumUsers')) || {};
+        
+        // Создание падающих цифр
+        function createFallingNumbers() {
+            const container = document.getElementById('falling-numbers');
+            
+            // Цифры от 1 до 100
+            for (let i = 1; i <= 100; i++) {
+                const number = document.createElement('div');
+                number.className = 'falling-number';
+                number.textContent = i;
+                
+                // Случайная позиция по горизонтали
+                number.style.left = Math.random() * 100 + 'vw';
+                
+                // Случайная скорость падения
+                const duration = Math.random() * 10 + 10; // от 10 до 20 секунд
+                number.style.animationDuration = duration + 's';
+                
+                // Случайная задержка начала анимации
+                number.style.animationDelay = Math.random() * 5 + 's';
+                
+                // Случайный размер
+                const size = Math.random() * 10 + 15; // от 15px до 25px
+                number.style.fontSize = size + 'px';
+                
+                // Случайная прозрачность
+                number.style.opacity = Math.random() * 0.4 + 0.1;
+                
+                container.appendChild(number);
+            }
+        }
+        
+        // Создание снежинок
+        function createSnowflakes() {
+            const snowflakesContainer = document.getElementById('snowflakes');
+            const snowflakeSymbols = ['❄', '❅', '❆', '✦', '✧', '★'];
+            
+            for (let i = 0; i < 80; i++) {
+                const snowflake = document.createElement('div');
+                snowflake.className = 'snowflake';
+                snowflake.textContent = snowflakeSymbols[Math.floor(Math.random() * snowflakeSymbols.length)];
+                
+                snowflake.style.left = Math.random() * 100 + 'vw';
+                snowflake.style.animationDelay = Math.random() * 5 + 's';
+                snowflake.style.animationDuration = Math.random() * 3 + 7 + 's';
+                snowflake.style.fontSize = (Math.random() * 15 + 10) + 'px';
+                snowflake.style.opacity = Math.random() * 0.5 + 0.3;
+                
+                snowflake.style.animation += `, spin ${Math.random() * 5 + 3}s linear infinite`;
+                
+                snowflakesContainer.appendChild(snowflake);
+            }
+            
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes spin {
+                    from { transform: rotate(0deg); }
+                    to { transform: rotate(360deg); }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        // Проверка валидности email
+        function validateEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
+        
+        // Проверка сложности пароля
+        function validatePassword(password) {
+            return password.length >= 6;
+        }
+        
+        // Проверка существующего пользователя
+        function userExists(email) {
+            return usersDatabase.hasOwnProperty(email);
+        }
+        
+        // Сохранение пользователя в базу данных
+        function saveUser(email, password) {
+            const userId = Date.now().toString();
+            const userData = {
+                id: userId,
+                email: email,
+                password: password, // В реальном приложении нужно хэшировать пароль!
+                regDate: new Date().toLocaleDateString('ru-RU'),
+                uid: Math.floor(100000 + Math.random() * 900000),
+                role: 'Пользователь',
+                hwid: 'Не привязан',
+                subscription: 'Без подписки',
+                hasActiveSubscription: false,
+                bonusApplied: false,
+                registrationDate: new Date().toISOString(),
+                lastLogin: new Date().toISOString()
+            };
+            
+            usersDatabase[email] = userData;
+            localStorage.setItem('plutoniumUsers', JSON.stringify(usersDatabase));
+            
+            return userData;
+        }
+        
+        // Аутентификация пользователя
+        function authenticateUser(email, password) {
+            if (usersDatabase[email] && usersDatabase[email].password === password) {
+                // Обновляем время последнего входа
+                usersDatabase[email].lastLogin = new Date().toISOString();
+                localStorage.setItem('plutoniumUsers', JSON.stringify(usersDatabase));
+                
+                return usersDatabase[email];
+            }
+            return null;
+        }
+        
+        // Показать/скрыть модальное окно
+        function showModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function hideModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+        
+        // Показать основное содержимое сайта
+        function showSite() {
+            document.getElementById('site-header').style.display = 'block';
+            document.getElementById('site-footer').style.display = 'block';
+            document.getElementById('home').style.display = 'block';
+        }
+        
+        // Переключение между модальными окнами
+        document.getElementById('switch-to-register').addEventListener('click', function(e) {
+            e.preventDefault();
+            hideModal('login-modal');
+            showModal('register-modal');
+        });
+        
+        document.getElementById('switch-to-login').addEventListener('click', function(e) {
+            e.preventDefault();
+            hideModal('register-modal');
+            showModal('login-modal');
+        });
+        
+        // Закрытие модальных окон
+        document.getElementById('close-login').addEventListener('click', function() {
+            hideModal('login-modal');
+        });
+        
+        document.getElementById('close-register').addEventListener('click', function() {
+            hideModal('register-modal');
+        });
+        
+        document.getElementById('close-telegram').addEventListener('click', function() {
+            hideModal('telegram-modal');
+        });
+        
+        document.getElementById('telegram-back').addEventListener('click', function(e) {
+            e.preventDefault();
+            hideModal('telegram-modal');
+        });
+        
+        // Закрытие модальных окон при клике на оверлей
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    hideModal(this.id);
+                }
+            });
+        });
+        
+        // Навигация по сайту
+        function showSection(sectionId) {
+            // Скрыть все секции
+            document.getElementById('home').style.display = 'none';
+            document.getElementById('products').style.display = 'none';
+            document.getElementById('profile').style.display = 'none';
+            
+            // Показать нужную секцию
+            if (sectionId === 'home') {
+                document.getElementById('home').style.display = 'block';
+            } else if (sectionId === 'products') {
+                document.getElementById('products').style.display = 'block';
+            } else if (sectionId === 'profile') {
+                if (currentUser) {
+                    document.getElementById('profile').style.display = 'block';
+                    updateProfileInfo();
+                } else {
+                    showModal('login-modal');
+                    return;
+                }
+            }
+            
+            // Обновить активные ссылки в навигации
+            document.querySelectorAll('.nav-menu a').forEach(link => {
+                link.classList.remove('active');
+            });
+            document.getElementById(`nav-${sectionId}`).classList.add('active');
+        }
+        
+        // Обработка формы входа
+        document.getElementById('login-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value;
+            
+            // Очистка ошибок
+            document.getElementById('login-email-error').style.display = 'none';
+            document.getElementById('login-password-error').style.display = 'none';
+            
+            // Валидация
+            let valid = true;
+            
+            if (!email || !validateEmail(email)) {
+                document.getElementById('login-email-error').textContent = 'Введите корректный email';
+                document.getElementById('login-email-error').style.display = 'block';
+                valid = false;
+            }
+            
+            if (!password) {
+                document.getElementById('login-password-error').textContent = 'Введите пароль';
+                document.getElementById('login-password-error').style.display = 'block';
+                valid = false;
+            }
+            
+            if (valid) {
+                // Попытка аутентификации
+                const user = authenticateUser(email, password);
+                
+                if (user) {
+                    currentUser = user;
+                    
+                    // Сохранение текущего пользователя в localStorage
+                    localStorage.setItem('plutoniumUser', JSON.stringify(currentUser));
+                    
+                    // Обновление интерфейса
+                    updateAuthUI();
+                    hideModal('login-modal');
+                    showSite();
+                    showSection('home');
+                    
+                    // Очистка формы
+                    document.getElementById('login-form').reset();
+                } else {
+                    document.getElementById('login-password-error').textContent = 'Неверный email или пароль';
+                    document.getElementById('login-password-error').style.display = 'block';
+                }
+            }
+        });
+        
+        // Обработка формы регистрации
+        document.getElementById('register-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('register-email').value.trim();
+            const password = document.getElementById('register-password').value;
+            const passwordConfirm = document.getElementById('register-password-confirm').value;
+            const promoCode = document.getElementById('register-promo').value.trim();
+            
+            // Очистка сообщений
+            document.getElementById('register-email-error').style.display = 'none';
+            document.getElementById('register-email-success').style.display = 'none';
+            document.getElementById('register-password-error').style.display = 'none';
+            document.getElementById('register-password-confirm-error').style.display = 'none';
+            document.getElementById('register-promo-success').style.display = 'none';
+            
+            // Валидация
+            let valid = true;
+            
+            // Проверка email
+            if (!email || !validateEmail(email)) {
+                document.getElementById('register-email-error').textContent = 'Введите корректный email';
+                document.getElementById('register-email-error').style.display = 'block';
+                valid = false;
+            } else if (userExists(email)) {
+                document.getElementById('register-email-error').textContent = 'Пользователь с таким email уже существует';
+                document.getElementById('register-email-error').style.display = 'block';
+                valid = false;
+            } else {
+                document.getElementById('register-email-success').textContent = '✓ Email доступен для регистрации';
+                document.getElementById('register-email-success').style.display = 'block';
+            }
+            
+            // Проверка пароля
+            if (!password) {
+                document.getElementById('register-password-error').textContent = 'Введите пароль';
+                document.getElementById('register-password-error').style.display = 'block';
+                valid = false;
+            } else if (!validatePassword(password)) {
+                document.getElementById('register-password-error').textContent = 'Пароль должен содержать не менее 6 символов';
+                document.getElementById('register-password-error').style.display = 'block';
+                valid = false;
+            }
+            
+            // Подтверждение пароля
+            if (password !== passwordConfirm) {
+                document.getElementById('register-password-confirm-error').textContent = 'Пароли не совпадают';
+                document.getElementById('register-password-confirm-error').style.display = 'block';
+                valid = false;
+            }
+            
+            if (valid) {
+                // Проверка промокода
+                let bonusApplied = false;
+                if (promoCode.toUpperCase() === 'PLUTONIUM25') {
+                    bonusApplied = true;
+                    document.getElementById('register-promo-success').textContent = '✓ Промокод успешно применен!';
+                    document.getElementById('register-promo-success').style.display = 'block';
+                }
+                
+                // Регистрация пользователя
+                const userData = saveUser(email, password);
+                userData.bonusApplied = bonusApplied;
+                userData.role = bonusApplied ? 'Пользователь с бонусом' : 'Пользователь';
+                
+                currentUser = userData;
+                
+                // Сохранение текущего пользователя
+                localStorage.setItem('plutoniumUser', JSON.stringify(currentUser));
+                
+                // Обновление интерфейса
+                updateAuthUI();
+                hideModal('register-modal');
+                showSite();
+                showSection('home');
+                
+                // Показываем сообщение о бонусе
+                if (bonusApplied) {
+                    setTimeout(() => {
+                        alert('🎉 Промокод успешно применен! Вы получили дополнительные бонусы к вашей учетной записи.');
+                    }, 500);
+                }
+                
+                // Очистка формы
+                document.getElementById('register-form').reset();
+                document.getElementById('register-promo').value = 'PLUTONIUM25';
+            }
+        });
+        
+        // Проверка доступности email в реальном времени
+        document.getElementById('register-email').addEventListener('blur', function() {
+            const email = this.value.trim();
+            
+            if (email && validateEmail(email)) {
+                if (userExists(email)) {
+                    document.getElementById('register-email-error').textContent = 'Пользователь с таким email уже существует';
+                    document.getElementById('register-email-error').style.display = 'block';
+                    document.getElementById('register-email-success').style.display = 'none';
+                } else {
+                    document.getElementById('register-email-success').textContent = '✓ Email доступен для регистрации';
+                    document.getElementById('register-email-success').style.display = 'block';
+                    document.getElementById('register-email-error').style.display = 'none';
+                }
+            }
+        });
+        
+        // Обновление UI после авторизации
+        function updateAuthUI() {
+            if (currentUser) {
+                // Показать информацию о пользователе
+                document.getElementById('auth-buttons').style.display = 'none';
+                document.getElementById('user-info').style.display = 'block';
+                document.getElementById('user-email').textContent = currentUser.email;
+                document.getElementById('nav-profile').style.display = 'block';
+            } else {
+                // Показать кнопки авторизации
+                document.getElementById('auth-buttons').style.display = 'flex';
+                document.getElementById('user-info').style.display = 'none';
+                document.getElementById('nav-profile').style.display = 'none';
+            }
+        }
+        
+        // Обновление информации в профиле
+        function updateProfileInfo() {
+            if (currentUser) {
+                document.getElementById('profile-email').textContent = currentUser.email;
+                document.getElementById('profile-reg-date').textContent = currentUser.regDate;
+                document.getElementById('profile-uid').textContent = currentUser.uid;
+                document.getElementById('profile-role').textContent = currentUser.role;
+                document.getElementById('profile-hwid').textContent = currentUser.hwid;
+                document.getElementById('subscription-plan').textContent = currentUser.subscription;
+                
+                // Обновление статуса подписки
+                const statusElement = document.getElementById('profile-subscription-status');
+                const statusTextElement = document.getElementById('subscription-status-text');
+                
+                if (currentUser.hasActiveSubscription) {
+                    statusElement.textContent = 'Подписка активна';
+                    statusElement.className = 'subscription-status active';
+                    statusTextElement.textContent = 'Активна';
+                    statusTextElement.className = 'subscription-status active';
+                    document.getElementById('subscription-end').textContent = 'Бессрочно';
+                } else {
+                    statusElement.textContent = 'Подписка не активна';
+                    statusElement.className = 'subscription-status inactive';
+                    statusTextElement.textContent = 'Не активна';
+                    statusTextElement.className = 'subscription-status inactive';
+                    document.getElementById('subscription-end').textContent = 'Не установлена';
+                }
+            }
+        }
+        
+        // Выход из аккаунта
+        function logout() {
+            currentUser = null;
+            localStorage.removeItem('plutoniumUser');
+            updateAuthUI();
+            showSection('home');
+        }
+        
+        // Переключение между вкладками профиля
+        document.getElementById('profile-info-btn').addEventListener('click', function(e) {
+            e.preventDefault();
+            document.querySelectorAll('.profile-menu a').forEach(link => {
+                link.classList.remove('active');
+            });
+            this.classList.add('active');
+            
+            document.getElementById('profile-info').style.display = 'block';
+            document.getElementById('profile-subscription').style.display = 'none';
+        });
+        
+        document.getElementById('profile-subscription-btn').addEventListener('click', function(e) {
+            e.preventDefault();
+            document.querySelectorAll('.profile-menu a').forEach(link => {
+                link.classList.remove('active');
+            });
+            this.classList.add('active');
+            
+            document.getElementById('profile-info').style.display = 'none';
+            document.getElementById('profile-subscription').style.display = 'block';
+        });
+        
+        // Обработка нажатия кнопки "Приобрести"
+        document.querySelectorAll('.btn-buy').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                if (!currentUser) {
+                    showModal('login-modal');
+                    return;
+                }
+                
+                // Получаем информацию о продукте
+                const product = this.getAttribute('data-product');
+                const price = this.getAttribute('data-price');
+                const productName = this.closest('.product-card').querySelector('.product-title').textContent;
+                const productPeriod = this.closest('.product-card').querySelector('.product-period').textContent;
+                
+                // Сохраняем выбранный продукт
+                selectedProduct = {
+                    id: product,
+                    name: productName,
+                    price: parseInt(price),
+                    period: productPeriod
+                };
+                
+                // Обновляем модальное окно Telegram
+                document.getElementById('telegram-product-title').textContent = productName;
+                document.getElementById('telegram-amount').textContent = `${price} ₽`;
+                
+                // Показываем модальное окно Telegram
+                showModal('telegram-modal');
+            });
+        });
+        
+        // Инициализация при загрузке страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            createFallingNumbers();
+            createSnowflakes();
+            
+            // Загрузка базы данных пользователей
+            usersDatabase = JSON.parse(localStorage.getItem('plutoniumUsers')) || {};
+            
+            // Проверка сохраненного пользователя
+            const savedUser = localStorage.getItem('plutoniumUser');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                updateAuthUI();
+                showSite();
+                showSection('home');
+            } else {
+                // Если пользователь не авторизован, показываем регистрацию
+                setTimeout(function() {
+                    showModal('register-modal');
+                    
+                    // Скрываем все элементы сайта кроме модального окна
+                    document.getElementById('site-header').style.display = 'none';
+                    document.getElementById('site-footer').style.display = 'none';
+                    document.getElementById('home').style.display = 'none';
+                    document.getElementById('products').style.display = 'none';
+                }, 500);
+            }
+            
+            // Навигация по клику на ссылки
+            document.querySelectorAll('.nav-menu a, .footer-nav').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    if (this.id === 'btn-login') {
+                        showModal('login-modal');
+                        return;
+                    }
+                    
+                    if (this.id === 'btn-register') {
+                        showModal('register-modal');
+                        return;
+                    }
+                    
+                    if (this.id === 'btn-logout' || this.id === 'profile-logout') {
+                        logout();
+                        return;
+                    }
+                    
+                    const target = this.getAttribute('data-target') || this.id.replace('nav-', '');
+                    showSection(target);
+                });
+            });
+            
+            // Кнопки входа и регистрации
+            document.getElementById('btn-login').addEventListener('click', function(e) {
+                e.preventDefault();
+                showModal('login-modal');
+            });
+            
+            document.getElementById('btn-register').addEventListener('click', function(e) {
+                e.preventDefault();
+                showModal('register-modal');
+            });
+            
+            // Кнопка выхода
+            document.getElementById('btn-logout').addEventListener('click', function(e) {
+                e.preventDefault();
+                logout();
+            });
+            
+            // Кнопка выхода в профиле
+            document.getElementById('profile-logout').addEventListener('click', function(e) {
+                e.preventDefault();
+                logout();
+            });
+        });
+    </script>
+</body>
+</html>
